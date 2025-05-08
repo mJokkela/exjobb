@@ -21,40 +21,45 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
     const loadAllHistory = async () => {
       setIsLoading(true);
       try {
-        const allQuantityHistory: HistoryEntry[] = [];
-        const allFieldHistory: FieldHistoryEntry[] = [];
-
-        // ladda historik för alla delar
-        await Promise.all(parts.map(async (part) => {
-          try {
-            const [qHistory, fHistory] = await Promise.all([
-              getPartHistory(part.internalArticleNumber),
-              getFieldHistory(part.internalArticleNumber)
-            ]);
-            allQuantityHistory.push(...qHistory);
-            allFieldHistory.push(...fHistory);
-          } catch (err) {
-            console.warn('⚠️ Misslyckades hämta historik för:', part.internalArticleNumber);
-          }
-        }));
-        
-
-        // Sort by date, newest first
-        setQuantityHistory(allQuantityHistory.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ));
-        setFieldHistory(allFieldHistory.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ));
-      } catch (error) {
-        console.error('Error loading history:', error);
+        // 1) Hämta historik för varenda part parallellt
+        const quantityResults = await Promise.all(
+          parts.map(p => getPartHistory(p.internalArticleNumber))
+        );
+        const fieldResults = await Promise.all(
+          parts.map(p => getFieldHistory(p.internalArticleNumber))
+        );
+  
+        // 2) Platta ut till två enkla arrayer
+        const allQuantity = quantityResults.flat();
+        const allField    = fieldResults.flat();
+  
+        // 3) (Valfritt) Deduplikera på id, så inga dubletter slinker med
+        const dedupQty = allQuantity.reduce<HistoryEntry[]>((acc, e) => {
+          return acc.some(x => x.id === e.id) ? acc : [...acc, e];
+        }, []);
+        const dedupField = allField.reduce<FieldHistoryEntry[]>((acc, e) => {
+          return acc.some(x => x.id === e.id) ? acc : [...acc, e];
+        }, []);
+  
+        // 4) Sortera så det nyaste kommer först, och ersätt state med HELA arrayen
+        setQuantityHistory(
+          dedupQty
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        );
+        setFieldHistory(
+          dedupField
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        );
+      } catch (err) {
+        console.error('Misslyckades hämta historik för alla delar', err);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     loadAllHistory();
-  }, [parts]);
+  }, [parts]);  // ← effekt körs när “parts” ändras eller komponenten mountas
+  
 
   const getPartName = (articleNumber: string) => {
     const part = parts.find(p => p.internalArticleNumber === articleNumber);
@@ -151,20 +156,20 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Laddar historik...</p>
             </div>
-          ) : activeTab === 'quantity' ? (
-              <HistoryList
-                history={filteredQuantityHistory.map(entry => ({
-                  ...entry,   // sprid in precis de fält som HistoryEntry-typen förväntar sig
-                  partNumber: `${entry.partNumber} – ${getPartName(entry.partNumber)}`
-                }))}
-              />
+            ) : activeTab === 'quantity' ? (
+                  <HistoryList
+                      history={quantityHistory.map(entry => ({
+                        ...entry,    // id, partNumber, actionType, previousQuantity, newQuantity, performedBy, comment, createdAt
+                        partNumber: `${entry.partNumber} – ${getPartName(entry.partNumber)}`
+                      }))}
+                  />
           ) : (
-            <FieldHistoryList 
-              history={filteredFieldHistory.map(entry => ({
-                ...entry,
-                partNumber: `${entry.partNumber} – ${getPartName(entry.partNumber)}`
-              }))} 
-            />
+                  <FieldHistoryList
+                      history={fieldHistory.map(entry => ({
+                        ...entry,
+                        partNumber: `${entry.partNumber} – ${getPartName(entry.partNumber)}`
+                      }))}
+                  />
           )}
         </div>
       </div>
