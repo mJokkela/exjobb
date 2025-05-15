@@ -229,6 +229,15 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
           'Manual withdrawal',
           'Quantity updated through take-out modal'
         );
+
+        const newEvents = await getPartHistory(selectedPart.internalArticleNumber);
+
+        setQuantityHistory(prev =>
+          [...newEvents, ...prev].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+        );
+
         if (onPartsUpdate) {
           const updatedParts = parts.map(part => 
             part.internalArticleNumber === selectedPart.internalArticleNumber 
@@ -468,7 +477,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
                        
                        {imageUrl ? (
                         <>
-                          {console.log('Image URL:', imageUrl)}
+                          {/* {console.log('Image URL:', imageUrl)} */}
                           <img
                             src={imageUrl}
                             alt={part.name}

@@ -15,6 +15,7 @@ export function HistoryList({ history }: HistoryListProps) {
       </div>
     );
   }
+  
 
   return (
     <div className="space-y-4">

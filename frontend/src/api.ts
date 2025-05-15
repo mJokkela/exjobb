@@ -111,7 +111,7 @@ export async function uploadImage(file: File, articleNumber: string) {
   }
   
   export async function getPartHistory(articleNumber: string) {
-    const res = await fetch(`http://localhost:3000/api/part-history/${encodeURIComponent(articleNumber)}`);
+     const res = await fetch(`http://localhost:3000/api/part-history/${encodeURIComponent(articleNumber)}`);
     if (!res.ok) throw new Error('Failed to fetch part history');
     return await res.json();
   }

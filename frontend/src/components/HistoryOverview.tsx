@@ -18,6 +18,7 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
   const [activeTab, setActiveTab] = useState<'quantity' | 'fields'>('quantity');
 
   useEffect(() => {
+    console.log('🔍 Parts to fetch history for:', parts);
     const loadAllHistory = async () => {
       setIsLoading(true);
       try {
@@ -28,28 +29,37 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
         const fieldResults = await Promise.all(
           parts.map(p => getFieldHistory(p.internalArticleNumber))
         );
+
+        console.log('🔍 quantityResults per part:', quantityResults);
+        console.log('🔍 fieldResults per part:   ', fieldResults);
   
         // 2) Platta ut till två enkla arrayer
-        const allQuantity = quantityResults.flat();
+        const allQuantity = quantityResults
+          .flat()
+          .map(item => ({
+            ...item,
+            actionType:
+              item.newQuantity < item.previousQuantity
+                ? 'WITHDRAWAL'
+                : 'ADDITION'
+          }));
         const allField    = fieldResults.flat();
   
-        // 3) (Valfritt) Deduplikera på id, så inga dubletter slinker med
-        const dedupQty = allQuantity.reduce<HistoryEntry[]>((acc, e) => {
-          return acc.some(x => x.id === e.id) ? acc : [...acc, e];
-        }, []);
-        const dedupField = allField.reduce<FieldHistoryEntry[]>((acc, e) => {
-          return acc.some(x => x.id === e.id) ? acc : [...acc, e];
-        }, []);
+        
   
-        // 4) Sortera så det nyaste kommer först, och ersätt state med HELA arrayen
+        // 3) Sortera så det nyaste kommer först, och ersätt state med HELA arrayen
         setQuantityHistory(
-          dedupQty
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+           allQuantity.sort((a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            )
         );
+
         setFieldHistory(
-          dedupField
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          allField.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
         );
+
       } catch (err) {
         console.error('Misslyckades hämta historik för alla delar', err);
       } finally {
@@ -58,7 +68,7 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
     };
   
     loadAllHistory();
-  }, [parts]);  // ← effekt körs när “parts” ändras eller komponenten mountas
+  }, []);  // ← effekt körs när “parts” ändras eller komponenten mountas
   
 
   const getPartName = (articleNumber: string) => {

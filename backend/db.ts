@@ -250,10 +250,29 @@ export const dbOperations = {
   
 
   insertPartHistory: async (articleNumber: string, quantity: number, oldQty: number, newQty: number, performedBy: string = 'System', comment: string = 'Ingen kommentar'): Promise<void> => {
-    await pool.query(`
-      INSERT INTO spare_parts_history (part_number, action_type, quantity, previous_quantity, new_quantity, performed_by, comment, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-    `, [articleNumber, 'ADDITION', quantity, oldQty, newQty, performedBy, comment]);
+
+    const actionType = newQty < oldQty ? 'WITHDRAWAL' : 'ADDITION';
+
+    console.log(
+      `⚙️ insertPartHistory called for ${articleNumber}:`,
+      { actionType, oldQty, newQty, performedBy, comment }
+    );
+
+    await pool.query(
+    `INSERT INTO spare_parts_history
+      (part_number, action_type, quantity, previous_quantity, new_quantity, performed_by, comment, created_at)
+     VALUES 
+      ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+    [
+      articleNumber,  // $1
+      actionType,     // $2  (WITHDRAWAL eller ADDITION)
+      oldQty,         // $3  quantity = saldot innan
+      oldQty,         // $4  previous_quantity
+      newQty,         // $5  new_quantity
+      performedBy,    // $6
+      comment         // $7
+    ]
+  );
   },
   
   
