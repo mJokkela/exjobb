@@ -1,20 +1,22 @@
 import { SparePart } from './types';
 
 
-const BASE_URL = 'http://localhost:3000/api';
+// const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 export async function getSpareParts() {
-  const res = await fetch(`${BASE_URL}/spare-parts`);
+  const res = await fetch(`${BASE_URL}/api/spare-parts`);
   return await res.json();
 }
 
 export async function getAppSettings() {
-  const res = await fetch(`${BASE_URL}/app-settings`);
+  const res = await fetch(`${BASE_URL}/api/app-settings`);
   return await res.json();
 }
 
 export async function insertSparePart(part: SparePart): Promise<void> {
-    const response = await fetch('http://localhost:3000/api/spare-parts', {
+    const response = await fetch(`${BASE_URL}/api/spare-parts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export async function updateQuantity(
     reason?: string,
     message?: string
   ) {
-    const res = await fetch(`http://localhost:3000/api/spare-parts/${id}`, {
+    const res = await fetch(`${BASE_URL}/api/spare-parts/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -54,7 +56,7 @@ export async function updateQuantity(
   }
 
 export async function insertHistory(history: any) {
-  const res = await fetch(`${BASE_URL}/history`, {
+  const res = await fetch(`${BASE_URL}/api/history`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(history),
@@ -63,7 +65,7 @@ export async function insertHistory(history: any) {
 }
 
 export async function importParts(parts: any[]) {
-  const res = await fetch(`${BASE_URL}/spare-parts/import`, {
+  const res = await fetch(`${BASE_URL}/api/spare-parts/import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ parts }),
@@ -76,7 +78,7 @@ export async function uploadImage(file: File, articleNumber: string) {
     formData.append('image', file);
     formData.append('articleNumber', articleNumber);
   
-    const res = await fetch('http://localhost:3000/api/upload-image', {
+    const res = await fetch(`${BASE_URL}/api/upload-image`, {
       method: 'POST',
       body: formData,
     });
@@ -90,7 +92,7 @@ export async function uploadImage(file: File, articleNumber: string) {
     formData.append('image', file);
     formData.append('articleNumber', 'LOGO'); // används bara för att matcha strukturen
   
-    const res = await fetch('http://localhost:3000/api/upload-image', {
+    const res = await fetch(`${BASE_URL}/api/upload-image`, {
       method: 'POST',
       body: formData,
     });
@@ -101,7 +103,7 @@ export async function uploadImage(file: File, articleNumber: string) {
   }
   
   export async function updateAppSettings(settings: { logoUrl: string }) {
-    const res = await fetch('http://localhost:3000/api/app-settings', {
+    const res = await fetch(`${BASE_URL}/api/app-settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings),
@@ -111,19 +113,19 @@ export async function uploadImage(file: File, articleNumber: string) {
   }
   
   export async function getPartHistory(articleNumber: string) {
-     const res = await fetch(`http://localhost:3000/api/part-history/${encodeURIComponent(articleNumber)}`);
+     const res = await fetch(`${BASE_URL}/api/part-history/${encodeURIComponent(articleNumber)}`);
     if (!res.ok) throw new Error('Failed to fetch part history');
     return await res.json();
   }
   
   export async function getFieldHistory(articleNumber: string) {
-    const res = await fetch(`http://localhost:3000/api/field-history/${encodeURIComponent(articleNumber)}`);
+    const res = await fetch(`${BASE_URL}/api/field-history/${encodeURIComponent(articleNumber)}`);
     if (!res.ok) throw new Error('Failed to fetch field history');
     return await res.json();
   }
 
   export async function deleteImage(imageUrl: string) {
-    const res = await fetch('http://localhost:3000/api/delete-image', {
+    const res = await fetch(`${BASE_URL}/api/delete-image`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageUrl }),
@@ -133,7 +135,7 @@ export async function uploadImage(file: File, articleNumber: string) {
   }
 
   export async function deletePart(articleNumber: string) {
-    const res = await fetch(`http://localhost:3000/api/spare-parts/${articleNumber}`, {
+    const res = await fetch(`${BASE_URL}/api/spare-parts/${articleNumber}`, {
       method: 'DELETE',
     });
   
