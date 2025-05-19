@@ -48,15 +48,20 @@ function App() {
     }
   };
 
-  const handlePartsUpdate = async (newParts: SparePart[]) => {
-    try {
-      await importParts(newParts);
-      setSpareParts(newParts);
-    } catch (error) {
-      console.error('Error updating parts:', error);
-      alert('Ett fel uppstod när reservdelarna skulle uppdateras');
-    }
-  };
+  // const handlePartsUpdate = async (newParts: SparePart[]) => {
+  //   try {
+  //     await importParts(newParts);
+  //     setSpareParts(newParts);
+  //   } catch (error) {
+  //     console.error('Error updating parts:', error);
+  //     alert('Ett fel uppstod när reservdelarna skulle uppdateras');
+  //   }
+  // };
+
+  const handlePartsUpdate = (newParts: SparePart[]) => {
+       // Endast uppdatera lokalt – inga server-anrop här
+       setSpareParts(newParts);
+     };
 
   const handleUpdateQuantity = async (articleNumber: string, newQuantity: number): Promise<void> => {
     try {

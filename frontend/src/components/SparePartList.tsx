@@ -184,23 +184,62 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
     return <p className="text-sm">{comment}</p>;
   };
 
-  const handleEditPart = async (updatedPart: SparePart) => {
-    try {
-      await insertSparePart(updatedPart);
-      if (onPartsUpdate) {
-        const updatedParts = parts.map(part => 
-          part.internalArticleNumber === updatedPart.internalArticleNumber ? updatedPart : part
-        );
-        onPartsUpdate(updatedParts);
-      }
-      setIsEditing(false);
-      setSelectedPart(null);
-      setShowProductInfo(false);
-    } catch (error) {
-      console.error('Error updating part:', error);
-      alert('Ett fel uppstod när reservdelen skulle uppdateras');
-    }
-  };
+  // const handleEditPart = async (updatedPart: SparePart) => {
+  //   try {
+  //     await insertSparePart(updatedPart);
+  //     if (onPartsUpdate) {
+  //       const updatedParts = parts.map(part => 
+  //         part.internalArticleNumber === updatedPart.internalArticleNumber ? updatedPart : part
+  //       );
+  //       onPartsUpdate(updatedParts);
+  //     }
+  //     setIsEditing(false);
+  //     setSelectedPart(null);
+  //     setShowProductInfo(false);
+  //   } catch (error) {
+  //     console.error('Error updating part:', error);
+  //     alert('Ett fel uppstod när reservdelen skulle uppdateras');
+  //   }
+  // };
+
+   const handleEditPart = async (updatedPart: SparePart) => {
+       try {
+         // 1) Uppdatera bara kvantiteten via PUT (endast en del)
+         await updateQuantity(
+           updatedPart.internalArticleNumber,
+           updatedPart.quantity,
+           'Manual update',
+           'Quantity updated through edit modal'
+         );
+    
+         // 2) Hämta just den här delens nya historikposter
+         const newEvents = await getPartHistory(
+           updatedPart.internalArticleNumber
+         );
+    
+         // 3) Mixa in dem i quantityHistory‐state
+         setQuantityHistory(prev =>
+           [...newEvents, ...prev].sort(
+             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+           )
+         );
+    
+         // 4) Uppdatera local state för listan
+         if (onPartsUpdate) {
+           const updatedParts = parts.map(part =>
+             part.internalArticleNumber === updatedPart.internalArticleNumber
+               ? updatedPart
+               : part
+           );
+           onPartsUpdate(updatedParts);
+         }
+       }
+       finally {
+         setIsEditing(false);
+         setSelectedPart(null);
+         setShowProductInfo(false);
+       }
+     };
 
   const handleDeletePart = async (articleNumber: string) => {
     if (!confirm('Är du säker på att du vill ta bort denna reservdel?')) {

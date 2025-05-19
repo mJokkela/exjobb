@@ -3,14 +3,25 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import type { SparePart, AppSettings, HistoryEntry, FieldHistoryEntry } from './types.ts';
+import dotenv from 'dotenv';
+dotenv.config();
+
+
+// const pool = new Pool({
+//   user: 'postgres',
+//   host: 'localhost',
+//   database: 'postgres',
+//   password: 'admin',
+//   port: 5432,
+// });
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'postgres',
-  password: 'admin',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // krävs av Railway
+  },
 });
+
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -187,7 +198,7 @@ export const dbOperations = {
     }
   },
 
-  updateQuantity: async (articleNumber: string, newQty: number): Promise<void> => {
+  updateQuantity: async (articleNumber: string, newQty: number, performedBy: string, comment: string): Promise<void> => {
     // 1. Hämta nuvarande saldo först
     const res = await pool.query(
       'SELECT quantity FROM spare_parts WHERE internal_article_number = $1',
@@ -207,8 +218,10 @@ export const dbOperations = {
       newQty,
       oldQty,
       newQty,
-      'System',              // performedBy
-      'Updated quantity through form' // comment
+      performedBy,
+      comment,
+      // 'System',              // performedBy
+      // 'Updated quantity through form' // comment
     );
     
     

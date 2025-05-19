@@ -1,9 +1,18 @@
-# Node.js
+# Node.js / TypeScript
 node_modules/
-npm-debug.log*
 dist/
+*.log
+npm-debug.log*
+
+# dotenv config
 .env
+.env.local
+
+# IDE/editor
+.vscode/
 .DS_Store
 
-# VS Code
-.vscode/
+# Output
+/uploads/
+frontend/dist/
+frontend/build/

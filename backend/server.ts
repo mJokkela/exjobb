@@ -45,8 +45,8 @@ app.post('/api/spare-parts', async (req, res) => {
 app.put('/api/spare-parts/:id', async (req, res): Promise<void> => {
   try {
     const { id } = req.params;
-    const { quantity } = req.body;
-    await dbOperations.updateQuantity(id, quantity);
+    const { quantity, reason, message } = req.body;
+    await dbOperations.updateQuantity(id, quantity, reason, message);
 
     res.json({ message:'Quantity updated' });
   } catch (err) {
