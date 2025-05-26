@@ -32,6 +32,8 @@ if (!fs.existsSync(uploadsDir)) {
 
 
 
+
+
 export const dbOperations = {
   getAllParts: async (): Promise<SparePart[]> => {
     const res = await pool.query('SELECT * FROM spare_parts');
@@ -129,6 +131,7 @@ export const dbOperations = {
     throw new Error('Endast JPG, PNG och GIF-filer är tillåtna');
   }
 
+  console.log('🔁 Multer S3 file object:', file);
   // Multer-s3 har redan laddat upp till S3 – vi returnerar URL:en
   return file.location;
 },

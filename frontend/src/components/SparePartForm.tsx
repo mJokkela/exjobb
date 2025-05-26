@@ -27,7 +27,7 @@ const defaultFormValues: SparePart = {
   roomSection: '',
   machineNumber: '',
   dimensions: {
-    length: 0, 
+    length: 0,
     height: 0,
     width: 0,
   },
@@ -112,11 +112,19 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         alert("Fyll i 'Internt artikelnummer' innan du laddar upp bild.");
         return;
       }
-      
+
       const { imageUrl } = await uploadImage(file, formValues.internalArticleNumber);
+
+      const result = await uploadImage(file, formValues.internalArticleNumber);
+      console.log('Svar från uploadImage:', result); //  lägg till denna
+
+      if (!result?.imageUrl) {
+        throw new Error('imageUrl saknas i svaret');
+      }
+
       setFormValues({ ...formValues, imageUrl });
-      
-      
+
+
       // städa upp prew url
       URL.revokeObjectURL(preview);
       setPreviewUrl(imageUrl);
@@ -148,7 +156,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+
     const newPart: SparePart = {
       internalArticleNumber: formData.get('internalArticleNumber') as string || '',
       supplierArticleNumber: formData.get('supplierArticleNumber') as string || '',
@@ -195,7 +203,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         {/* Basic Information */}
         <div className="space-y-4">
           <h3 className="font-semibold text-gray-900">Grundinformation</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Internt artikelnummer *</label>
             <input
@@ -292,7 +300,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         {/* Location Information */}
         <div className="space-y-4">
           <h3 className="font-semibold text-gray-900">Platsinfo</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Lagerplats *</label>
             <input
@@ -342,7 +350,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         {/* Dimensions */}
         <div className="space-y-4">
           <h3 className="font-semibold text-gray-900">Dimensioner</h3>
-          
+
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="block text-sm font-medium text-gray-700">Längd (mm)</label>
@@ -405,7 +413,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         {/* Supplier Information */}
         <div className="space-y-4">
           <h3 className="font-semibold text-gray-900">Leverantörsinformation</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Tillverkare</label>
             <input
@@ -443,7 +451,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         {/* Stock Information */}
         <div className="space-y-4">
           <h3 className="font-semibold text-gray-900">Lagerinformation</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Pris (tkr)</label>
             <input
@@ -474,7 +482,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
         {/* Additional Information */}
         <div className="space-y-4">
           <h3 className="font-semibold text-gray-900">Övrig information</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Datum</label>
             <input
