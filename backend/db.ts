@@ -82,30 +82,50 @@ export const dbOperations = {
     );
   },
 
-  uploadImage: async (file: Express.Multer.File, articleNumber: string): Promise<string> => {
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error('Bilden får inte vara större än 5MB');
-    }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.mimetype.toLowerCase())) {
-      throw new Error('Endast JPG, PNG och GIF-filer är tillåtna');
-    }
+  //----------------------------------------------------------
+  //ladda upp lokalt
+  // uploadImage: async (file: Express.Multer.File, articleNumber: string): Promise<string> => {
+  //   if (file.size > 5 * 1024 * 1024) {
+  //     throw new Error('Bilden får inte vara större än 5MB');
+  //   }
 
-    const ext = path.extname(file.originalname);
-    const cleanArticleNumber = articleNumber.replace(/[^a-zA-Z0-9-_]/g, '');
-    const fileName = `${cleanArticleNumber}-${uuidv4()}${ext}`;
-    const uploadsDir = path.join(__dirname, '../uploads');
-    const filePath = path.join(uploadsDir, fileName); // Bilden sparas här
+  //   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  //   if (!allowedTypes.includes(file.mimetype.toLowerCase())) {
+  //     throw new Error('Endast JPG, PNG och GIF-filer är tillåtna');
+  //   }
 
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
+  //   const ext = path.extname(file.originalname);
+  //   const cleanArticleNumber = articleNumber.replace(/[^a-zA-Z0-9-_]/g, '');
+  //   const fileName = `${cleanArticleNumber}-${uuidv4()}${ext}`;
+  //   const uploadsDir = path.join(__dirname, '../uploads');
+  //   const filePath = path.join(uploadsDir, fileName); // Bilden sparas här
+
+  //   if (!fs.existsSync(uploadsDir)) {
+  //     fs.mkdirSync(uploadsDir, { recursive: true });
+  //   }
     
 
-    fs.writeFileSync(filePath, file.buffer);
-    return `/uploads/${fileName}`; // detta sparas i databasen och används i frontend
-  },
+  //   fs.writeFileSync(filePath, file.buffer);
+  //   return `/uploads/${fileName}`; // detta sparas i databasen och används i frontend
+  // },
+  //----------------------------------------------------------
+
+  //ladda upp till S3 file: Express.MulterS3.File
+  uploadImage: async (file: any): Promise<string> => {
+  // Typkontroll: maxstorlek och filtyp (du kan återanvända din gamla kod om du vill)
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Bilden får inte vara större än 5MB');
+  }
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (!allowedTypes.includes(file.mimetype.toLowerCase())) {
+    throw new Error('Endast JPG, PNG och GIF-filer är tillåtna');
+  }
+
+  // Multer-s3 har redan laddat upp till S3 – vi returnerar URL:en
+  return file.location;
+},
 
   insertPart: async (part: SparePart) => {
     await pool.query(`

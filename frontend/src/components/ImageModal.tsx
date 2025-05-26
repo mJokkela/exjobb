@@ -1,6 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 
+const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNODUgOTVIMTE1TTEwMCA4MFYxMTAiIHN0cm9rZT0iI0Q1RDZEQiIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=';
+
 interface ImageModalProps {
   imageUrl: string;
   alt: string;
@@ -49,7 +51,7 @@ export function ImageModal({ imageUrl, alt, onClose }: ImageModalProps) {
             alt={alt}
             className="max-w-full max-h-[90vh] object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://dummyimage.com/64x64/cfcbcf/000000&text=Bild+Saknas';
+              (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
             }}
           />
         </div>

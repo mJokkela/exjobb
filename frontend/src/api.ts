@@ -73,34 +73,35 @@ export async function importParts(parts: any[]) {
   return await res.json();
 }
 
-export async function uploadImage(file: File, articleNumber: string) {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('articleNumber', articleNumber);
+export async function uploadImage(file: File, articleNumber: string): Promise<{ imageUrl: string }> {
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('articleNumber', articleNumber);
   
-    const res = await fetch(`${BASE_URL}/api/upload-image`, {
-      method: 'POST',
-      body: formData,
-    });
+
+  const res = await fetch(`${BASE_URL}/api/upload-image`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error('Image upload failed');
+  return await res.json(); // { imageUrl: 'https://...s3.amazonaws.com/...' }
+}
   
-    if (!res.ok) throw new Error('Image upload failed');
-    return await res.json(); // { imageUrl: '/uploads/filename.jpg' }
-  }
+  // export async function uploadLogo(file: File) {
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+  //   formData.append('articleNumber', 'LOGO'); // används bara för att matcha strukturen
   
-  export async function uploadLogo(file: File) {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('articleNumber', 'LOGO'); // används bara för att matcha strukturen
+  //   const res = await fetch(`${BASE_URL}/api/upload-image`, {
+  //     method: 'POST',
+  //     body: formData,
+  //   });
   
-    const res = await fetch(`${BASE_URL}/api/upload-image`, {
-      method: 'POST',
-      body: formData,
-    });
-  
-    if (!res.ok) throw new Error('Logo upload failed');
-    const { imageUrl } = await res.json();
-    return imageUrl;
-  }
+  //   if (!res.ok) throw new Error('Logo upload failed');
+  //   const { imageUrl } = await res.json();
+  //   return imageUrl;
+  // }
   
   export async function updateAppSettings(settings: { logoUrl: string }) {
     const res = await fetch(`${BASE_URL}/api/app-settings`, {

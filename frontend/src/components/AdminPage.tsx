@@ -3,7 +3,7 @@ import { SparePartForm } from './SparePartForm';
 import { SparePart } from '../types';
 import { Shield, Upload, Image as ImageIcon, Package, Archive, PenTool as Tool } from 'lucide-react';
 import { read, utils } from 'xlsx';
-import { uploadImage, uploadLogo, updateAppSettings } from '../api';
+import { uploadImage, updateAppSettings } from '../api';
 
 interface AdminPageProps {
   onAddPart: (part: SparePart) => void;
@@ -107,34 +107,34 @@ export function AdminPage({ onAddPart, parts }: AdminPageProps) {
     }
   };
 
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (!file) return;
 
-    setIsUploading(true);
-    setUploadError('');
+  //   setIsUploading(true);
+  //   setUploadError('');
 
-    try {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Bilden får inte vara större än 5MB');
-      }
+  //   try {
+  //     // Validate file size (max 5MB)
+  //     if (file.size > 5 * 1024 * 1024) {
+  //       throw new Error('Bilden får inte vara större än 5MB');
+  //     }
 
-      const logoUrl = await uploadLogo(file);
-      await updateAppSettings({ logoUrl });
+  //     const logoUrl = await uploadLogo(file);
+  //     await updateAppSettings({ logoUrl });
       
-      // Refresh to show new logo
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error uploading logo:', error);
-      setUploadError(error.message || 'Ett fel uppstod vid uppladdning av logotypen');
-    } finally {
-      setIsUploading(false);
-      if (logoInputRef.current) {
-        logoInputRef.current.value = '';
-      }
-    }
-  };
+  //     // Refresh to show new logo
+  //     window.location.reload();
+  //   } catch (error: any) {
+  //     console.error('Error uploading logo:', error);
+  //     setUploadError(error.message || 'Ett fel uppstod vid uppladdning av logotypen');
+  //   } finally {
+  //     setIsUploading(false);
+  //     if (logoInputRef.current) {
+  //       logoInputRef.current.value = '';
+  //     }
+  //   }
+  // };
 
   const handleSparePartImageUpload = async () => {
     if (!imageFile || !importedPart) return;
@@ -169,7 +169,7 @@ export function AdminPage({ onAddPart, parts }: AdminPageProps) {
                 className="hidden"
               />
             </label>
-            <label className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isUploading ? 'bg-green-500 cursor-wait' : 'bg-green-600 hover:bg-green-700 cursor-pointer'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}>
+            {/* <label className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isUploading ? 'bg-green-500 cursor-wait' : 'bg-green-600 hover:bg-green-700 cursor-pointer'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}>
               <ImageIcon className="h-4 w-4 mr-2" />
               {isUploading ? 'Laddar upp...' : 'Ändra logotyp'}
               <input
@@ -180,7 +180,7 @@ export function AdminPage({ onAddPart, parts }: AdminPageProps) {
                 className="hidden"
                 disabled={isUploading}
               />
-            </label>
+            </label> */}
           </div>
         </div>
 

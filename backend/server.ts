@@ -97,7 +97,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res): Promise<
       res.status(400).json({ error: 'Missing image or article number' });
       return;
     }
-    const imageUrl = await dbOperations.uploadImage(req.file, articleNumber);
+    const imageUrl = await dbOperations.uploadImage(req.file);
     res.json({ imageUrl });
   } catch (err) {
     console.error(err);
