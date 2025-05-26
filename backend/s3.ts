@@ -19,6 +19,7 @@ export interface S3File extends Express.Multer.File {
   location: string;
 }
 
+console.log('🧪 S3 BUCKET:', process.env.S3_BUCKET_NAME);
 
 export const upload = multer({
   storage: multerS3({
