@@ -13,7 +13,7 @@ const users = [
   'Mikael Gilén',
   'Janne Kummelås',
   'Fredrik Holgersson',
-  'Henrik Lindström',
+  'Andreas Sandberg',
   'Annan'
 ];
 
