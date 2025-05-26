@@ -4,18 +4,19 @@ import multer from 'multer';
 import path from 'path';
 import { dbOperations } from './db';
 import type { S3File } from './s3';
+import { upload } from './s3';
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
 app.use(express.json());
-const rootUploadsPath = path.join(__dirname, '../uploads');
-app.use('/uploads', express.static(rootUploadsPath));
-console.log('Serving from:', rootUploadsPath);
+// const rootUploadsPath = path.join(__dirname, '../uploads');
+// app.use('/uploads', express.static(rootUploadsPath));
+// console.log('Serving from:', rootUploadsPath);
 
 
-const upload = multer({ storage: multer.memoryStorage() });
+
 
 // GET all spare parts
 app.get('/api/spare-parts', async (req, res): Promise<void> => {
