@@ -3,6 +3,7 @@ import cors from 'cors';
 import multer from 'multer';
 import path from 'path';
 import { dbOperations } from './db';
+import type { S3File } from './s3';
 
 const app = express();
 const port = 3000;
@@ -97,7 +98,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res): Promise<
       res.status(400).json({ error: 'Missing image or article number' });
       return;
     }
-    const imageUrl = await dbOperations.uploadImage(req.file);
+    const imageUrl = await dbOperations.uploadImage(req.file as S3File);
     res.json({ imageUrl });
   } catch (err) {
     console.error(err);

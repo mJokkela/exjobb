@@ -4,6 +4,8 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import type { SparePart, AppSettings, HistoryEntry, FieldHistoryEntry } from './types.ts';
 import dotenv from 'dotenv';
+import { Request } from 'express';
+import type { S3File } from './s3';
 dotenv.config();
 
 
@@ -27,6 +29,8 @@ const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
+
+
 
 export const dbOperations = {
   getAllParts: async (): Promise<SparePart[]> => {
@@ -111,9 +115,11 @@ export const dbOperations = {
   // },
   //----------------------------------------------------------
 
+  
+
   //ladda upp till S3 file: Express.MulterS3.File
-  uploadImage: async (file: any): Promise<string> => {
-  // Typkontroll: maxstorlek och filtyp (du kan återanvända din gamla kod om du vill)
+  uploadImage: async (file: S3File): Promise<string> => {
+  // Typkontroll: maxstorlek och filtyp (kan återanvända gammal kod om så vill)
   if (file.size > 5 * 1024 * 1024) {
     throw new Error('Bilden får inte vara större än 5MB');
   }
