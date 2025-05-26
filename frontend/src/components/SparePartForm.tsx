@@ -115,12 +115,12 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
 
       const { imageUrl } = await uploadImage(file, formValues.internalArticleNumber);
 
-      const result = await uploadImage(file, formValues.internalArticleNumber);
-      console.log('Svar från uploadImage:', result); //  lägg till denna
+      // const result = await uploadImage(file, formValues.internalArticleNumber);
+      // console.log('Svar från uploadImage:', result); //  lägg till denna
 
-      if (!result?.imageUrl) {
-        throw new Error('imageUrl saknas i svaret');
-      }
+      // if (!result?.imageUrl) {
+      //   throw new Error('imageUrl saknas i svaret');
+      // }
 
       setFormValues({ ...formValues, imageUrl });
 
