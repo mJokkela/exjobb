@@ -74,7 +74,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
         <circle cx="60" cy="60" r="12" fill="#cbd5e0"/>
       </svg>
     `);
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 
@@ -486,9 +486,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
               ) : (
            
             filteredParts.map((part) => {
-              const imageUrl = part.imageUrl
-                ? `${API_BASE_URL}${part.imageUrl}`
-                : PLACEHOLDER_IMAGE;
+              const imageUrl = part.imageUrl || PLACEHOLDER_IMAGE;
             
               return (
 

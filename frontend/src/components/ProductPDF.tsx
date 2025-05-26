@@ -7,7 +7,7 @@ interface ProductPDFProps {
   part: SparePart;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 
@@ -26,9 +26,7 @@ encodeURIComponent(`
 export const ProductPDF = forwardRef<HTMLDivElement, ProductPDFProps>(({ part }, ref) => {
   const [imageError, setImageError] = useState(false);
 
-  const imageUrl = part.imageUrl
-  ? `${API_BASE_URL}${part.imageUrl}`
-  : PLACEHOLDER_IMAGE;
+  const imageUrl = part.imageUrl || PLACEHOLDER_IMAGE;
 
 
   return (
