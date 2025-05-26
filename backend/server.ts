@@ -99,6 +99,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res): Promise<
       return;
     }
     const imageUrl = await dbOperations.uploadImage(req.file as S3File);
+    console.log('📸 Upload imageUrl:', imageUrl);
     res.json({ imageUrl });
   } catch (err) {
     console.error(err);
