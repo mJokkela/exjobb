@@ -25,6 +25,7 @@ export const upload = multer({
     s3,
     bucket: process.env.S3_BUCKET_NAME!,
     acl: 'public-read',
+    contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: (req: Request, file: Express.Multer.File, cb: (error: any, metadata?: any) => void) => {
       cb(null, { fieldName: file.fieldname });
     },
