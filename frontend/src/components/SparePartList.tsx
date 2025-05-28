@@ -17,14 +17,14 @@ import TakeOutModal from './TakeOutModal';
 
 
 interface SparePartListProps {
-  onPartsUpdate: (parts: SparePart[]) => void;
   parts: SparePart[];
+  onPartsUpdate?: (parts: SparePart[]) => void;
 }
 
 type SortField = 'name' | 'date' | 'price';
 
 
-export function SparePartList({ onPartsUpdate, parts }: SparePartListProps) {
+export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   const qrPrintRef = useRef<HTMLDivElement>(null);
   const productPrintRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -206,10 +206,7 @@ export function SparePartList({ onPartsUpdate, parts }: SparePartListProps) {
   const handleEditPart = async (updatedPart: SparePart) => {
     try {
 
-      if (imageFile) {
-        const { imageUrl } = await uploadImage(imageFile, updatedPart.internalArticleNumber);
-        updatedPart.imageUrl = imageUrl; // lägg in rätt S3-url i reservdelen!
-      }
+      
       // 1) Uppdatera bara kvantiteten via PUT (endast en del)
       await updateQuantity(
         updatedPart.internalArticleNumber,
@@ -244,7 +241,6 @@ export function SparePartList({ onPartsUpdate, parts }: SparePartListProps) {
       setIsEditing(false);
       setSelectedPart(null);
       setShowProductInfo(false);
-      setImageFile(null);
     }
   };
 
@@ -830,17 +826,7 @@ export function SparePartList({ onPartsUpdate, parts }: SparePartListProps) {
               </button>
             </div>
             <SparePartForm
-              onAdd={(updatedPart) => {
-                const updatedParts = parts.map(part =>
-                  part.internalArticleNumber === updatedPart.internalArticleNumber
-                    ? updatedPart
-                    : part
-                );
-                onPartsUpdate(updatedParts);
-                setIsEditing(false);
-                setSelectedPart(null);
-                setShowProductInfo(false);
-              }}
+              onAdd={handleEditPart}
               initialData={selectedPart}
             />
           </div>
