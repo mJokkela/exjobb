@@ -145,7 +145,7 @@ export const dbOperations = {
         room_section, machine_number, dimensions_length, dimensions_height, dimensions_width,
         weight, manufacturer, supplier, supplier_org_id, price, location, building,
         storage_rack, shelf_level, quantity, date, storage_priority, added_by,
-        orderer_name, imageUrl, comment, updated_at
+        orderer_name, image_url, comment, updated_at
       ) VALUES (
         $1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
@@ -177,7 +177,7 @@ export const dbOperations = {
         storage_priority = EXCLUDED.storage_priority,
         added_by = EXCLUDED.added_by,
         orderer_name = EXCLUDED.orderer_name,
-        imageUrl = EXCLUDED.imageUrl,
+        image_url = EXCLUDED.image_url,
         comment = EXCLUDED.comment,
         updated_at = EXCLUDED.updated_at 
      `,[
@@ -258,21 +258,21 @@ export const dbOperations = {
     
   },  
 
-  getFieldHistory: async (articleNumber: string): Promise<FieldHistoryEntry[]> => {
-    const res = await pool.query(
-      'SELECT * FROM spare_parts_field_history WHERE part_number = $1 ORDER BY created_at DESC',
-      [articleNumber]
-    );
-    return res.rows.map(row => ({
-      id:          row.id,
-      partNumber:  row.part_number,
-      fieldName:   row.field_name,
-      oldValue:    row.old_value,
-      newValue:    row.new_value,
-      performedBy: row.performed_by,
-      createdAt:   row.created_at.toISOString()
-    }));
-  },
+  // getFieldHistory: async (articleNumber: string): Promise<FieldHistoryEntry[]> => {
+  //   const res = await pool.query(
+  //     'SELECT * FROM spare_parts_field_history WHERE part_number = $1 ORDER BY created_at DESC',
+  //     [articleNumber]
+  //   );
+  //   return res.rows.map(row => ({
+  //     id:          row.id,
+  //     partNumber:  row.part_number,
+  //     fieldName:   row.field_name,
+  //     oldValue:    row.old_value,
+  //     newValue:    row.new_value,
+  //     performedBy: row.performed_by,
+  //     createdAt:   row.created_at.toISOString()
+  //   }));
+  // },
   
   getPartHistory: async (articleNumber: string): Promise<HistoryEntry[]> => {
     const res = await pool.query(
@@ -320,13 +320,13 @@ export const dbOperations = {
   },
   
   
-  insertFieldHistory: async (articleNumber: string, fieldName: string, oldValue: string, newValue: string, performedBy: string = 'System'): Promise<void> => {
-    await pool.query(
-      `INSERT INTO spare_parts_field_history (part_number, field_name, old_value, new_value, created_at)
-       VALUES ($1, $2, $3, $4, NOW())`,
-      [articleNumber, fieldName, oldValue, newValue, performedBy]
-    );
-  },
+  // insertFieldHistory: async (articleNumber: string, fieldName: string, oldValue: string, newValue: string, performedBy: string = 'System'): Promise<void> => {
+  //   await pool.query(
+  //     `INSERT INTO spare_parts_field_history (part_number, field_name, old_value, new_value, created_at)
+  //      VALUES ($1, $2, $3, $4, NOW())`,
+  //     [articleNumber, fieldName, oldValue, newValue, performedBy]
+  //   );
+  // },
 
   deleteImage: async (imageUrl: string): Promise<void> => {
     try {
