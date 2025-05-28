@@ -827,41 +827,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ladda upp ny bild</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={e => setImageFile(e.target.files?.[0] || null)}
-                className="block w-full mb-2"
-              />
-              <button
-                disabled={!imageFile || isUploading}
-                onClick={async () => {
-                  if (!imageFile || !selectedPart) return;
-                  setIsUploading(true);
-                  setUploadError('');
-                  try {
-                    const { imageUrl } = await uploadImage(imageFile, selectedPart.internalArticleNumber);
-                    // Uppdatera selectedPart med nya url
-                    setSelectedPart({ ...selectedPart, imageUrl });
-                    // Nollställ file input
-                    setImageFile(null);
-                  } catch (err) {
-                    setUploadError('Kunde inte ladda upp bild');
-                  } finally {
-                    setIsUploading(false);
-                  }
-                }}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm"
-              >
-                {isUploading ? 'Laddar upp...' : 'Ladda upp bild'}
-              </button>
-              {uploadError && <div className="text-red-600 mt-1">{uploadError}</div>}
-              {selectedPart.imageUrl && (
-                <img src={selectedPart.imageUrl} alt="Uppladdad bild" className="h-20 mt-2 rounded shadow" />
-              )}
-            </div>
+            
             <SparePartForm
               onAdd={handleEditPart}
               initialData={selectedPart}
