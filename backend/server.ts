@@ -124,17 +124,17 @@ app.get('/api/part-history/:articleNumber', async (req, res): Promise<void> => {
     }
   });
   
-  // Fältändringshistorik
-  app.get('/api/field-history/:articleNumber', async (req, res): Promise<void> => {
-    try {
-      const { articleNumber } = req.params;
-      const history = await dbOperations.getFieldHistory(articleNumber);
-      res.json(history);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error fetching field history' });
-    }
-  });
+  // // Fältändringshistorik
+  // app.get('/api/field-history/:articleNumber', async (req, res): Promise<void> => {
+  //   try {
+  //     const { articleNumber } = req.params;
+  //     const history = await dbOperations.getFieldHistory(articleNumber);
+  //     res.json(history);
+  //   } catch (err) {
+  //     console.error(err);
+  //     res.status(500).json({ error: 'Error fetching field history' });
+  //   }
+  // });
 
   app.post('/api/delete-image', async function (req: Request, res: Response): Promise<void> {
     try {

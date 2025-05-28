@@ -143,7 +143,7 @@ export const dbOperations = {
         room_section, machine_number, dimensions_length, dimensions_height, dimensions_width,
         weight, manufacturer, supplier, supplier_org_id, price, location, building,
         storage_rack, shelf_level, quantity, date, storage_priority, added_by,
-        orderer_name, image_url, comment, updated_at
+        orderer_name, imageUrl, comment, updated_at
       ) VALUES (
         $1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
@@ -175,7 +175,7 @@ export const dbOperations = {
         storage_priority = EXCLUDED.storage_priority,
         added_by = EXCLUDED.added_by,
         orderer_name = EXCLUDED.orderer_name,
-        image_url = EXCLUDED.image_url,
+        imageUrl = EXCLUDED.imageUrl,
         comment = EXCLUDED.comment,
         updated_at = EXCLUDED.updated_at 
      `,[
