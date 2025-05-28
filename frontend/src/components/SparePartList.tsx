@@ -11,7 +11,7 @@ import { ImageModal } from './ImageModal';
 // import { HistoryList } from './HistoryList';
 // import { FieldHistoryList } from './FieldHistoryList';
 import { HistoryOverview } from './HistoryOverview';
-import { getPartHistory, uploadImage, deletePart, updateQuantity } from '../api';
+import { getPartHistory, uploadImage, deletePart, updateQuantity, insertSparePart } from '../api';
 import TakeOutModal from './TakeOutModal';
 
 
@@ -207,13 +207,14 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   // };
 
   const handleEditPart = async (updatedPart: SparePart & { imageFile?: File }) => {
-
-    if (updatedPart.imageFile) {
-      const { imageUrl } = await uploadImage(updatedPart.imageFile, updatedPart.internalArticleNumber);
-      updatedPart.imageUrl = imageUrl;
-    }
     try {
+      if (updatedPart.imageFile) {
+        const { imageUrl } = await uploadImage(updatedPart.imageFile, updatedPart.internalArticleNumber);
+        updatedPart.imageUrl = imageUrl;
+      }
 
+
+      await insertSparePart(updatedPart);
 
       // 1) Uppdatera bara kvantiteten via PUT (endast en del)
       await updateQuantity(
@@ -222,7 +223,6 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
         'Manual update',
         'Quantity updated through edit modal'
       );
-
       // 2) Hämta just den här delens nya historikposter
       const newEvents = await getPartHistory(
         updatedPart.internalArticleNumber

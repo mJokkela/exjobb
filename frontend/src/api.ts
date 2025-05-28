@@ -55,6 +55,14 @@ export async function updateQuantity(
     return await res.json();
   }
 
+//   export async function updatePart(part: SparePart): Promise<void> {
+//   await fetch(`/api/spare-parts/${part.internalArticleNumber}`, {
+//     method: "PUT",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(part),
+//   });
+// }
+
 export async function insertHistory(history: any) {
   const res = await fetch(`${BASE_URL}/api/history`, {
     method: 'POST',
