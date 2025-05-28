@@ -206,10 +206,15 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   const handleEditPart = async (updatedPart: SparePart) => {
     try {
 
-      if (imageFile) {
-        const { imageUrl } = await uploadImage(imageFile, updatedPart.internalArticleNumber);
-        updatedPart.imageUrl = imageUrl; // lägg in rätt S3-url i reservdelen!
+      if (!imageFile || !selectedPart) return;
+      try {
+        const { imageUrl } = await uploadImage(imageFile, selectedPart.internalArticleNumber);
+        setSelectedPart({ ...selectedPart, imageUrl });
+      } catch (error) {
+        console.error('Image upload failed', error);
+        alert('Uppladdning av reservdelsbild misslyckades');
       }
+
       // 1) Uppdatera bara kvantiteten via PUT (endast en del)
       await updateQuantity(
         updatedPart.internalArticleNumber,
