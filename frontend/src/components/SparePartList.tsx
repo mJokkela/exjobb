@@ -208,13 +208,15 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
 
   const handleEditPart = async (updatedPart: SparePart & { imageFile?: File }) => {
     try {
+      // if (updatedPart.imageFile) {
+      //   const { imageUrl } = await uploadImage(updatedPart.imageFile, updatedPart.internalArticleNumber);
+      //   updatedPart.imageUrl = imageUrl;
+      // }
+
+
       if (updatedPart.imageFile) {
-        const { imageUrl } = await uploadImage(updatedPart.imageFile, updatedPart.internalArticleNumber);
-        updatedPart.imageUrl = imageUrl;
-      }
-
-
-      await insertSparePart(updatedPart);
+      await uploadImage(updatedPart.imageFile, updatedPart.internalArticleNumber);
+    }
 
       // 1) Uppdatera bara kvantiteten via PUT (endast en del)
       await updateQuantity(
