@@ -115,15 +115,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
 
       const { imageUrl } = await uploadImage(file, formValues.internalArticleNumber);
 
-      // const result = await uploadImage(file, formValues.internalArticleNumber);
-      // console.log('Svar från uploadImage:', result); //  lägg till denna
-
-      // if (!result?.imageUrl) {
-      //   throw new Error('imageUrl saknas i svaret');
-      // }
-
       setFormValues({ ...formValues, imageUrl });
-
 
       // städa upp prew url
       URL.revokeObjectURL(preview);
@@ -188,6 +180,8 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
       comment: formData.get('comment') as string || ''
     };
 
+      console.log('Ska spara reservdel:', newPart);
+      
     onAdd(newPart);
     e.currentTarget.reset();
     setFormValues(defaultFormValues);
