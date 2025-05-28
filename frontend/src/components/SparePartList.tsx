@@ -52,8 +52,9 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   const [showHistoryOverview, setShowHistoryOverview] = useState(false);
   const [selectedParts, setSelectedParts] = useState<Set<string>>(new Set());
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   // Sort parts alphabetically by name
   const sortedParts = [...parts].sort((a, b) => {
@@ -205,7 +206,12 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   //   }
   // };
 
-  const handleEditPart = async (updatedPart: SparePart) => {
+  const handleEditPart = async (updatedPart: SparePart & { imageFile?: File }) => {
+
+    if (updatedPart.imageFile) {
+      const { imageUrl } = await uploadImage(updatedPart.imageFile, updatedPart.internalArticleNumber);
+      updatedPart.imageUrl = imageUrl;
+    }
     try {
 
 
@@ -243,6 +249,8 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
       setIsEditing(false);
       setSelectedPart(null);
       setShowProductInfo(false);
+      setImageFile(null);
+      setPreviewUrl(null);
     }
   };
 
@@ -827,7 +835,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            
+
             <SparePartForm
               onAdd={handleEditPart}
               initialData={selectedPart}
