@@ -3,7 +3,7 @@ import { HistoryEntry, FieldHistoryEntry, SparePart } from '../types';
 import { HistoryList } from './HistoryList';
 import { FieldHistoryList } from './FieldHistoryList';
 import { History, Edit, X, Search } from 'lucide-react';
-import { getPartHistory, getFieldHistory } from '../api';
+import { getPartHistory } from '../api';
 
 interface HistoryOverviewProps {
   onClose: () => void;
@@ -26,12 +26,12 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
         const quantityResults = await Promise.all(
           parts.map(p => getPartHistory(p.internalArticleNumber))
         );
-        const fieldResults = await Promise.all(
-          parts.map(p => getFieldHistory(p.internalArticleNumber))
-        );
+        // const fieldResults = await Promise.all(
+        //   parts.map(p => getFieldHistory(p.internalArticleNumber))
+        // );
 
         console.log('🔍 quantityResults per part:', quantityResults);
-        console.log('🔍 fieldResults per part:   ', fieldResults);
+        // console.log('🔍 fieldResults per part:   ', fieldResults);
   
         // 2) Platta ut till två enkla arrayer
         const allQuantity = quantityResults
@@ -43,7 +43,7 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
                 ? 'WITHDRAWAL'
                 : 'ADDITION'
           }));
-        const allField    = fieldResults.flat();
+        // const allField    = fieldResults.flat();
   
         
   
@@ -54,11 +54,11 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
             )
         );
 
-        setFieldHistory(
-          allField.sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-        );
+        // setFieldHistory(
+        //   allField.sort((a, b) =>
+        //     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        //   )
+        // );
 
       } catch (err) {
         console.error('Misslyckades hämta historik för alla delar', err);
@@ -76,32 +76,32 @@ export function HistoryOverview({ onClose, parts }: HistoryOverviewProps) {
     return part ? part.name : articleNumber;
   };
 
-  const filteredQuantityHistory = quantityHistory.filter(entry => {
-    // Hämta partName och se till att det alltid är en sträng
-    const partName = getPartName(entry.partNumber) ?? '';
-    // Gör söktermen säker
-    const searchLower = (searchTerm ?? '').toLowerCase();
+  // const filteredQuantityHistory = quantityHistory.filter(entry => {
+  //   // Hämta partName och se till att det alltid är en sträng
+  //   const partName = getPartName(entry.partNumber) ?? '';
+  //   // Gör söktermen säker
+  //   const searchLower = (searchTerm ?? '').toLowerCase();
   
-    return (
-      // Skydda entry.partNumber
-      (entry.partNumber ?? '').toLowerCase().includes(searchLower) ||
-      // Skydda partName
-      partName.toLowerCase().includes(searchLower) ||
-      // Skydda entry.performedBy
-      (entry.performedBy ?? '').toLowerCase().includes(searchLower)
-    );
-  });
+  //   return (
+  //     // Skydda entry.partNumber
+  //     (entry.partNumber ?? '').toLowerCase().includes(searchLower) ||
+  //     // Skydda partName
+  //     partName.toLowerCase().includes(searchLower) ||
+  //     // Skydda entry.performedBy
+  //     (entry.performedBy ?? '').toLowerCase().includes(searchLower)
+  //   );
+  // });
   
 
-  const filteredFieldHistory = fieldHistory.filter(entry => {
-    const partName = getPartName(entry.partNumber);
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      entry.partNumber.toLowerCase().includes(searchLower) ||
-      partName.toLowerCase().includes(searchLower) ||
-      entry.performedBy.toLowerCase().includes(searchLower)
-    );
-  });
+  // const filteredFieldHistory = fieldHistory.filter(entry => {
+  //   const partName = getPartName(entry.partNumber);
+  //   const searchLower = searchTerm.toLowerCase();
+  //   return (
+  //     entry.partNumber.toLowerCase().includes(searchLower) ||
+  //     partName.toLowerCase().includes(searchLower) ||
+  //     entry.performedBy.toLowerCase().includes(searchLower)
+  //   );
+  // });
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">

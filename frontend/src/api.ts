@@ -119,11 +119,11 @@ export async function uploadImage(file: File, articleNumber: string): Promise<{ 
     return await res.json();
   }
   
-  export async function getFieldHistory(articleNumber: string) {
-    const res = await fetch(`${BASE_URL}/api/field-history/${encodeURIComponent(articleNumber)}`);
-    if (!res.ok) throw new Error('Failed to fetch field history');
-    return await res.json();
-  }
+  // export async function getFieldHistory(articleNumber: string) {
+  //   const res = await fetch(`${BASE_URL}/api/field-history/${encodeURIComponent(articleNumber)}`);
+  //   if (!res.ok) throw new Error('Failed to fetch field history');
+  //   return await res.json();
+  // }
 
   export async function deleteImage(imageUrl: string) {
     const res = await fetch(`${BASE_URL}/api/delete-image`, {

@@ -8,10 +8,10 @@ import { QRPrintPage } from './QRPrintPage';
 import { MultiQRPrintPage } from './MultiQRPrintPage';
 import { SparePartForm } from './SparePartForm';
 import { ImageModal } from './ImageModal';
-import { HistoryList } from './HistoryList';
-import { FieldHistoryList } from './FieldHistoryList';
+// import { HistoryList } from './HistoryList';
+// import { FieldHistoryList } from './FieldHistoryList';
 import { HistoryOverview } from './HistoryOverview';
-import { getPartHistory, getFieldHistory, insertSparePart, deletePart, updateQuantity } from '../api';
+import { getPartHistory, uploadImage, deletePart, updateQuantity } from '../api';
 import TakeOutModal from './TakeOutModal';
 
 
@@ -51,6 +51,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [showHistoryOverview, setShowHistoryOverview] = useState(false);
   const [selectedParts, setSelectedParts] = useState<Set<string>>(new Set());
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Sort parts alphabetically by name
   const sortedParts = [...parts].sort((a, b) => {
@@ -83,7 +84,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
-  
+
 
   const togglePartSelection = (articleNumber: string) => {
     const newSelection = new Set(selectedParts);
@@ -104,7 +105,7 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   };
 
   const exportSelectedToExcel = () => {
-    const selectedPartsData = parts.filter(part => 
+    const selectedPartsData = parts.filter(part =>
       selectedParts.has(part.internalArticleNumber)
     );
     const worksheet = utils.json_to_sheet(selectedPartsData);
@@ -116,12 +117,12 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   const loadHistory = async (articleNumber: string) => {
     setIsLoadingHistory(true);
     try {
-      const [qHistory, fHistory] = await Promise.all([
+      const [qHistory] = await Promise.all([
         getPartHistory(articleNumber),
-        getFieldHistory(articleNumber)
+        // getFieldHistory(articleNumber)
       ]);
       setQuantityHistory(qHistory);
-      setFieldHistory(fHistory);
+      // setFieldHistory(fHistory);
     } catch (error) {
       console.error('Error loading history:', error);
     } finally {
@@ -202,50 +203,56 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
   //   }
   // };
 
-   const handleEditPart = async (updatedPart: SparePart) => {
-       try {
-         // 1) Uppdatera bara kvantiteten via PUT (endast en del)
-         await updateQuantity(
-           updatedPart.internalArticleNumber,
-           updatedPart.quantity,
-           'Manual update',
-           'Quantity updated through edit modal'
-         );
-    
-         // 2) Hämta just den här delens nya historikposter
-         const newEvents = await getPartHistory(
-           updatedPart.internalArticleNumber
-         );
-    
-         // 3) Mixa in dem i quantityHistory‐state
-         setQuantityHistory(prev =>
-           [...newEvents, ...prev].sort(
-             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-           )
-         );
-    
-         // 4) Uppdatera local state för listan
-         if (onPartsUpdate) {
-           const updatedParts = parts.map(part =>
-             part.internalArticleNumber === updatedPart.internalArticleNumber
-               ? updatedPart
-               : part
-           );
-           onPartsUpdate(updatedParts);
-         }
-       }
-       finally {
-         setIsEditing(false);
-         setSelectedPart(null);
-         setShowProductInfo(false);
-       }
-     };
+  const handleEditPart = async (updatedPart: SparePart) => {
+    try {
+
+      if (imageFile) {
+        const { imageUrl } = await uploadImage(imageFile, updatedPart.internalArticleNumber);
+        updatedPart.imageUrl = imageUrl; // lägg in rätt S3-url i reservdelen!
+      }
+      // 1) Uppdatera bara kvantiteten via PUT (endast en del)
+      await updateQuantity(
+        updatedPart.internalArticleNumber,
+        updatedPart.quantity,
+        'Manual update',
+        'Quantity updated through edit modal'
+      );
+
+      // 2) Hämta just den här delens nya historikposter
+      const newEvents = await getPartHistory(
+        updatedPart.internalArticleNumber
+      );
+
+      // 3) Mixa in dem i quantityHistory‐state
+      setQuantityHistory(prev =>
+        [...newEvents, ...prev].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+      );
+
+      // 4) Uppdatera local state för listan
+      if (onPartsUpdate) {
+        const updatedParts = parts.map(part =>
+          part.internalArticleNumber === updatedPart.internalArticleNumber
+            ? updatedPart
+            : part
+        );
+        onPartsUpdate(updatedParts);
+      }
+    }
+    finally {
+      setIsEditing(false);
+      setSelectedPart(null);
+      setShowProductInfo(false);
+      setImageFile(null);
+    }
+  };
 
   const handleDeletePart = async (articleNumber: string) => {
     if (!confirm('Är du säker på att du vill ta bort denna reservdel?')) {
       return;
     }
-    
+
     try {
       await deletePart(articleNumber);
       if (onPartsUpdate) {
@@ -278,8 +285,8 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
         );
 
         if (onPartsUpdate) {
-          const updatedParts = parts.map(part => 
-            part.internalArticleNumber === selectedPart.internalArticleNumber 
+          const updatedParts = parts.map(part =>
+            part.internalArticleNumber === selectedPart.internalArticleNumber
               ? { ...part, quantity: newQuantity }
               : part
           );
@@ -483,174 +490,174 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
               <Package className="h-12 w-12 mx-auto text-gray-400 mb-2" />
               <p className="text-gray-500">Inga reservdelar hittades</p>
             </div>
-              ) : (
-           
+          ) : (
+
             filteredParts.map((part) => {
               const imageUrl = part.imageUrl || PLACEHOLDER_IMAGE;
-            
+
               return (
 
-              <div key={part.internalArticleNumber} className="bg-white border rounded-lg shadow-sm p-4">
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      {/* Selection checkbox */}
-                      <button
-                        onClick={() => togglePartSelection(part.internalArticleNumber)}
-                        className="mt-1"
-                      >
-                        {selectedParts.has(part.internalArticleNumber) ? (
-                          <CheckSquare className="h-5 w-5 text-blue-600" />
-                        ) : (
-                          <Square className="h-5 w-5 text-gray-400" />
-                        )}
-                      </button>
+                <div key={part.internalArticleNumber} className="bg-white border rounded-lg shadow-sm p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        {/* Selection checkbox */}
+                        <button
+                          onClick={() => togglePartSelection(part.internalArticleNumber)}
+                          className="mt-1"
+                        >
+                          {selectedParts.has(part.internalArticleNumber) ? (
+                            <CheckSquare className="h-5 w-5 text-blue-600" />
+                          ) : (
+                            <Square className="h-5 w-5 text-gray-400" />
+                          )}
+                        </button>
 
-                      {/* Image */}
-                      <div 
-                        className="h-16 w-16 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 cursor-pointer transition-transform hover:scale-105"
-                        onClick={() => imageUrl && setZoomedImage({ url: imageUrl, alt: part.name })}
-                      >
-                       
-                       {imageUrl ? (
-                        <>
-                          {/* {console.log('Image URL:', imageUrl)} */}
-                          <img
-                            src={imageUrl}
-                            alt={part.name}
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-                            }}
-                          />
-                        </>
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <ImageIcon className="h-6 w-6 text-gray-400" />
+                        {/* Image */}
+                        <div
+                          className="h-16 w-16 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 cursor-pointer transition-transform hover:scale-105"
+                          onClick={() => imageUrl && setZoomedImage({ url: imageUrl, alt: part.name })}
+                        >
+
+                          {imageUrl ? (
+                            <>
+                              {/* {console.log('Image URL:', imageUrl)} */}
+                              <img
+                                src={imageUrl}
+                                alt={part.name}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+                                }}
+                              />
+                            </>
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <ImageIcon className="h-6 w-6 text-gray-400" />
+                            </div>
+                          )}
+
                         </div>
-                      )}
 
-                      </div>
-
-                      {/* Basic Info */}
-                      <div>
-                        <h3 className="text-sm font-medium text-blue-600 flex items-center gap-1 cursor-pointer"
+                        {/* Basic Info */}
+                        <div>
+                          <h3 className="text-sm font-medium text-blue-600 flex items-center gap-1 cursor-pointer"
                             onClick={() => {
                               setSelectedPart(part);
                               setShowProductInfo(true);
                               loadHistory(part.internalArticleNumber);
                             }}>
-                          <FileText className="h-4 w-4" />
-                          {part.internalArticleNumber}
-                        </h3>
-                        <p className="text-sm font-medium text-gray-900 mt-1">{part.name}</p>
-                        <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-500">
-                          <div>
-                            <span className="font-medium">Typ:</span> {part.type || '-'}
+                            <FileText className="h-4 w-4" />
+                            {part.internalArticleNumber}
+                          </h3>
+                          <p className="text-sm font-medium text-gray-900 mt-1">{part.name}</p>
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-500">
+                            <div>
+                              <span className="font-medium">Typ:</span> {part.type || '-'}
+                            </div>
+                            <div>
+                              <span className="font-medium">Antal:</span> {part.quantity}
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-medium">Antal:</span> {part.quantity}
+                        </div>
+                      </div>
+
+                      {/* Actions Dropdown */}
+                      <div className="relative dropdown-menu">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdownId(openDropdownId === part.internalArticleNumber ? null : part.internalArticleNumber);
+                          }}
+                          className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        >
+                          <MoreVertical className="h-5 w-5" />
+                        </button>
+                        {openDropdownId === part.internalArticleNumber && (
+                          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                            <div className="py-1" role="menu">
+                              <button
+                                onClick={async () => {
+                                  setSelectedPart(part);
+                                  setShowTakeOutModal(true);
+                                  setOpenDropdownId(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <MinusCircle className="h-4 w-4 mr-2" />
+                                Ta ut
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedPart(part);
+                                  setIsEditing(true);
+                                  setOpenDropdownId(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Redigera
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedPart(part);
+                                  setShowQRPrint(true);
+                                  setOpenDropdownId(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <QrCode className="h-4 w-4 mr-2" />
+                                Skriv ut QR-kod
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handleDeletePart(part.internalArticleNumber);
+                                  setOpenDropdownId(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                              >
+                                <Trash className="h-4 w-4 mr-2" />
+                                Ta bort
+                              </button>
+                            </div>
                           </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Location Info Row */}
+                    <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+                      <div className="flex items-center gap-1 text-gray-600">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm">Plats:</span>
+                      </div>
+                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                        <div className="bg-green-50 px-2 py-1 rounded">
+                          <span className="text-green-700">{part.location || 'Linslageriet'}</span>
+                        </div>
+                        <div className="bg-blue-50 px-2 py-1 rounded">
+                          <span className="text-blue-700">{part.storageRack || '-'}</span>
+                        </div>
+                        <div className="bg-yellow-50 px-2 py-1 rounded">
+                          <span className="text-yellow-700">{part.building || '-'}</span>
+                        </div>
+                        <div className="bg-red-50 px-2 py-1 rounded">
+                          <span className="text-red-700">{part.shelfLevel || '-'}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Actions Dropdown */}
-                    <div className="relative dropdown-menu">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenDropdownId(openDropdownId === part.internalArticleNumber ? null : part.internalArticleNumber);
-                        }}
-                        className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                      >
-                        <MoreVertical className="h-5 w-5" />
-                      </button>
-                      {openDropdownId === part.internalArticleNumber && (
-                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                          <div className="py-1" role="menu">
-                            <button
-                              onClick={async () => {
-                                setSelectedPart(part);
-                                setShowTakeOutModal(true);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                            >
-                              <MinusCircle className="h-4 w-4 mr-2" />
-                              Ta ut
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedPart(part);
-                                setIsEditing(true);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                            >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Redigera
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedPart(part);
-                                setShowQRPrint(true);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                            >
-                              <QrCode className="h-4 w-4 mr-2" />
-                              Skriv ut QR-kod
-                            </button>
-                            <button
-                              onClick={() => {
-                                handleDeletePart(part.internalArticleNumber);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
-                            >
-                              <Trash className="h-4 w-4 mr-2" />
-                              Ta bort
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    {/* Comment Section */}
+                    {part.comment && (
+                      <div className="flex items-start gap-1 text-gray-600">
+                        <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        {formatComment(part.comment, part.internalArticleNumber)}
+                      </div>
+                    )}
                   </div>
-
-                  {/* Location Info Row */}
-                  <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <MapPin className="h-4 w-4" />
-                      <span className="text-sm">Plats:</span>
-                    </div>
-                    <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                      <div className="bg-green-50 px-2 py-1 rounded">
-                        <span className="text-green-700">{part.location || 'Linslageriet'}</span>
-                      </div>
-                      <div className="bg-blue-50 px-2 py-1 rounded">
-                        <span className="text-blue-700">{part.storageRack || '-'}</span>
-                      </div>
-                      <div className="bg-yellow-50 px-2 py-1 rounded">
-                        <span className="text-yellow-700">{part.building || '-'}</span>
-                      </div>
-                      <div className="bg-red-50 px-2 py-1 rounded">
-                        <span className="text-red-700">{part.shelfLevel || '-'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Comment Section */}
-                  {part.comment && (
-                    <div className="flex items-start gap-1 text-gray-600">
-                      <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      {formatComment(part.comment, part.internalArticleNumber)}
-                    </div>
-                  )}
                 </div>
-              </div>
               );
-            }))}            
+            }))}
         </div>
       </div>
 
@@ -688,9 +695,9 @@ export function SparePartList({ parts, onPartsUpdate }: SparePartListProps) {
             </div>
             <div className="preview-content">
               {selectedParts.size > 1 ? (
-                <MultiQRPrintPage 
-                  ref={qrPrintRef} 
-                  parts={parts.filter(p => selectedParts.has(p.internalArticleNumber))} 
+                <MultiQRPrintPage
+                  ref={qrPrintRef}
+                  parts={parts.filter(p => selectedParts.has(p.internalArticleNumber))}
                 />
               ) : (
                 <QRPrintPage ref={qrPrintRef} part={selectedPart} />
