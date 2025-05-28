@@ -137,6 +137,8 @@ export const dbOperations = {
 },
 
   insertPart: async (part: SparePart) => {
+    console.log('Ska spara reservdel i DB:', part);
+
     await pool.query(`
       INSERT INTO spare_parts (
         internal_article_number, supplier_article_number, name, type, department,

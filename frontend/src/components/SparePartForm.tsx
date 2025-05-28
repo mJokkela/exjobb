@@ -180,7 +180,7 @@ export function SparePartForm({ onAdd, initialData }: SparePartFormProps) {
       comment: formData.get('comment') as string || ''
     };
 
-      console.log('Ska spara reservdel:', newPart);
+      // console.log('Ska spara reservdel:', newPart);
       
     onAdd(newPart);
     e.currentTarget.reset();
